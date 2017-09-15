@@ -4,7 +4,9 @@ import java.lang.reflect.Field
 import java.util.UUID
 
 fun shouldQuote(fieldType: Field): Boolean {
-    val type = fieldType.type
+    return shouldQuote(fieldType.type)
+}
 
-    return type == String::class.java || type == UUID::class.java
+fun shouldQuote(clazz: Class<*>): Boolean {
+    return clazz == String::class.java || clazz == UUID::class.java
 }

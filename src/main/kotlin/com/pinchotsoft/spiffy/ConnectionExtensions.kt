@@ -5,16 +5,18 @@ import java.sql.ResultSet
 import java.sql.Statement
 import java.util.Vector
 
+/**
+ * Executes the given sql, after substituting the values in the map. The replacement is case-insensitive.
+ * Returns a list of the given type from the result set.
+ */
 fun <T> Connection.query(sql: String, parameters: Map<String, Any?>, clazz: Class<T>): List<T> {
-    var localSql = sql
-    if (parameters.count() > 0) {
-        for ((key, value) in parameters)
-            localSql = localSql.replace("@$key", value.toString())
-    }
-
-    return query(localSql, clazz)
+    return query(insertMapValues(sql, parameters), clazz)
 }
 
+/**
+ * Executes the given sql, substituting any matching values found on the given template object. The name matching is case-insensitive.
+ * Returns a list of the given type from the result set.
+ */
 fun <T> Connection.query(sql: String, template: T): List<T> where T : kotlin.Any {
     val extractRegex = Regex("@[a-zA-Z]+")
 
@@ -37,6 +39,9 @@ fun <T> Connection.query(sql: String, template: T): List<T> where T : kotlin.Any
     return query(localSql, clazz)
 }
 
+/**
+ * Executes the given sql and returns a list of the given type from the result set
+ */
 fun <T> Connection.query(sql: String, clazz: Class<T>): List<T> {
     var stmt: Statement? = null
     var rs: ResultSet? = null
@@ -60,4 +65,47 @@ fun <T> Connection.query(sql: String, clazz: Class<T>): List<T> {
     }
 
     return emptyList()
+}
+
+/**
+ * Executes the given sql after substituting the values in the map. The replacement is case-insensitive.
+ * Will return null if a Statement was not created or an exception occurred during the execution of the sql.
+ * Returns the result of the statement otherwise. See Statement.execute for more information.
+ */
+fun Connection.execute(sql:String, parameters: Map<String, Any?>): Boolean? {
+    return execute(insertMapValues(sql, parameters))
+}
+
+/**
+ * Executes the given sql string. Will return null if a Statement was not created or an exception occurred during the execution of the sql.
+ * Returns the result of the statement otherwise. See Statement.execute for more information.
+ */
+fun Connection.execute(sql:String): Boolean? {
+    var stmt: Statement? = null
+
+    try {
+        stmt = this.createStatement() ?: return null
+        return stmt.execute(sql)
+    } catch (e: Exception) {
+        // Log something? Throw error?
+    } finally {
+        stmt?.close()
+    }
+
+    return null
+}
+
+private fun insertMapValues(sql: String, parameters: Map<String, Any?>): String {
+    var localSql = sql
+
+    if (parameters.count() > 0) {
+        for ((key, value) in parameters) {
+            val rgx = Regex("@$key", RegexOption.IGNORE_CASE)
+            val sqlValue = if (shouldQuote(value!!::class.java)) "'$value'" else value.toString()
+
+            localSql = localSql.replace(rgx, sqlValue)
+        }
+    }
+
+    return sql
 }
