@@ -4,6 +4,11 @@ import java.lang.reflect.Constructor
 import java.sql.ResultSet
 
 fun <T> mapModel(rs: ResultSet, clazz: Class<T>): T {
+    if (isPrimitive(clazz)) {
+        @Suppress("UNCHECKED_CAST")
+        return rs.getObject(1) as T
+    }
+
     val aConstructor = clazz.constructors.firstOrNull { it.parameters.isEmpty() }
 
     return if (aConstructor != null)

@@ -18,3 +18,23 @@ fun <T> getFieldValue(obj: T, field: Field, clazz: Class<T>): Any? {
     return getter.invoke(obj)
 }
 
+fun isPrimitive(clazz: Class<*>): Boolean {
+    return clazz.isPrimitive || ReflectionHelper.wrapperTypes.contains(clazz)
+}
+
+private class ReflectionHelper {
+    companion object {
+        val wrapperTypes: Set<Class<*>> = setOf(
+                String::class.java,
+                Boolean::class.java,
+                Character::class.java,
+                Byte::class.java,
+                Short::class.java,
+                Integer::class.java,
+                Long::class.java,
+                Float::class.java,
+                Double::class.java,
+                Void::class.java)
+    }
+}
+
