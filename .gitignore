@@ -39,6 +39,8 @@ gradle-app.setting
 .idea/**/gradle.xml
 .idea/**/libraries
 
+out/
+
 .DS_Store
 .AppleDouble
 .LSOverride

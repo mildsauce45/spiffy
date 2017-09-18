@@ -57,6 +57,8 @@ fun <T> Connection.query(sql: String, clazz: Class<T>): List<T> {
 
             results.add(m)
         }
+
+        return results
     } catch (e: Exception) {
         // Log something? Throw error?
     } finally {
@@ -107,5 +109,5 @@ private fun insertMapValues(sql: String, parameters: Map<String, Any?>): String 
         }
     }
 
-    return sql
+    return localSql
 }

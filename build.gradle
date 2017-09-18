@@ -10,7 +10,6 @@ buildscript {
 
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "com.microsoft.sqlserver:mssql-jdbc:6.2.1.jre8"
     }
 }
 
@@ -22,6 +21,7 @@ repositories {
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
+    compile "com.microsoft.sqlserver:mssql-jdbc:6.2.1.jre8"
 
     testCompile 'junit:junit:4.12'
     testCompile "org.jetbrains.kotlin:kotlin-test"
