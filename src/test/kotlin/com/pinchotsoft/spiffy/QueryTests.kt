@@ -19,6 +19,16 @@ class QueryTests {
     }
 
     @Test
+    fun test_simpleSql_handlesPrimitive() {
+        connectionFactory.get(connString, user, pass).use {
+            val results = it.query("select cost from cards where Id = 1", Int::class.java)
+
+            assert(results.count() > 0)
+            assert(results.first() > 0)
+        }
+    }
+
+    @Test
     fun test_simpleSql_handlesDataClass() {
         connectionFactory.get(connString, user, pass).use {
             val results = it.query("select * from Cards", Card::class.java)
