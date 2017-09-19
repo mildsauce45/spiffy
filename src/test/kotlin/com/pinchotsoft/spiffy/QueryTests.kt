@@ -71,4 +71,30 @@ class QueryTests {
             assert(result!!.name != "")
         }
     }
+
+    @Test
+    fun test_query_selectDataClassSubset() {
+        connectionFactory.get(connString, user, pass).use {
+            val result = it.query("select name, text, cardtype from cards where Id = 1", Card::class.java).firstOrNull()
+
+            assert(result != null)
+
+            assert(result!!.id == 0) // because we didnt map that field in the select statement
+            assert(result.cost == 0) // same reason
+            assert(result.name != "")
+        }
+    }
+
+    @Test
+    fun test_query_selectPojoSubset() {
+        connectionFactory.get(connString, user, pass).use {
+            val result = it.query("select name, text, cardtype from cards where Id = 1", Card2::class.java).firstOrNull()
+
+            assert(result != null)
+
+            assert(result!!.id == 0) // because we didnt map that field in the select statement
+            assert(result.cost == 0) // same reason
+            assert(result.name != "")
+        }
+    }
 }

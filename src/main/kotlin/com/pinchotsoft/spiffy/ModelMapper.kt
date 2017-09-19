@@ -39,11 +39,18 @@ private fun <T> mapPojo(rs: ResultSet, constructor: Constructor<*>, clazz: Class
 private fun <T> mapDataClass(rs: ResultSet, clazz: Class<T>): T {
     val aConstructor = clazz.constructors.first()
 
-    val argNames = clazz.declaredFields.map { it.name }
+    val metadata = rs.metaData ?: throw IllegalStateException("Metadata not found in result set")
 
     val constructorArgs = ArrayList<Any?>()
 
-    argNames.mapTo(constructorArgs) { rs.getObject(it) }
+    for (field in clazz.declaredFields) {
+        val hasMatch = (1..metadata.columnCount).any { metadata.getColumnName(it).equals(field.name, true) }
+
+        if (hasMatch)
+            constructorArgs.add(rs.getObject(field.name))
+        else
+            constructorArgs.add(getDefaultValue(field.type))
+    }
 
     @Suppress("UNCHECKED_CAST")
     return aConstructor.newInstance(*(constructorArgs.toArray())) as T
