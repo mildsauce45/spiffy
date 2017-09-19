@@ -1,23 +1,24 @@
 package com.pinchotsoft.spiffy
 
-import java.sql.Connection
-import java.sql.ResultSet
-import java.sql.Statement
+import java.sql.*
 import java.util.Vector
 
 /**
  * Executes the given sql, after substituting the values in the map. The replacement is case-insensitive.
  * Returns a list of the given type from the result set.
  */
-fun <T> Connection.query(sql: String, parameters: Map<String, Any?>, clazz: Class<T>): List<T> {
-    return query(insertMapValues(sql, parameters), clazz)
+fun <T> Connection.query(sql: String, parameters: Map<String, Any?>, clazz: Class<T>, commandType: CommandType = CommandType.TEXT): List<T> {
+    return if (commandType == CommandType.TEXT)
+        query(insertMapValues(sql, parameters), clazz, commandType)
+    else
+        executeStoredProcWithResults(this, sql, parameters, clazz)
 }
 
 /**
  * Executes the given sql, substituting any matching values found on the given template object. The name matching is case-insensitive.
  * Returns a list of the given type from the result set.
  */
-fun <T> Connection.query(sql: String, template: T): List<T> where T : kotlin.Any {
+fun <T> Connection.query(sql: String, template: T, commandType: CommandType = CommandType.TEXT): List<T> where T : kotlin.Any {
     val extractRegex = Regex("@[a-zA-Z]+")
 
     val matches = extractRegex.findAll(sql)
@@ -36,37 +37,17 @@ fun <T> Connection.query(sql: String, template: T): List<T> where T : kotlin.Any
         }
     }
 
-    return query(localSql, clazz)
+    return query(localSql, clazz, commandType)
 }
 
 /**
  * Executes the given sql and returns a list of the given type from the result set
  */
-fun <T> Connection.query(sql: String, clazz: Class<T>): List<T> {
-    var stmt: Statement? = null
-    var rs: ResultSet? = null
-
-    try {
-        stmt = this.createStatement() ?: return emptyList()
-        rs = stmt.executeQuery(sql) ?: return emptyList()
-
-        val results = Vector<T>()
-
-        while (rs.next()) {
-            val m = mapModel(rs, clazz) ?: continue
-
-            results.add(m)
-        }
-
-        return results
-    } catch (e: Exception) {
-        // Log something? Throw error?
-    } finally {
-        stmt?.close()
-        rs?.close()
-    }
-
-    return emptyList()
+fun <T> Connection.query(sql: String, clazz: Class<T>, commandType: CommandType = CommandType.TEXT): List<T> {
+    return if (commandType == CommandType.TEXT)
+        executeTextCommandWithResults(this, sql, clazz)
+    else
+        executeStoredProcWithResults(this, sql, emptyMap(), clazz)
 }
 
 /**
@@ -110,4 +91,69 @@ private fun insertMapValues(sql: String, parameters: Map<String, Any?>): String 
     }
 
     return localSql
+}
+
+private fun <T> executeTextCommandWithResults(conn: Connection, sql: String, clazz: Class<T>): List<T> {
+    var stmt: Statement? = null
+    var rs: ResultSet? = null
+
+    try {
+        stmt = conn.createStatement() ?: return emptyList()
+        rs = stmt.executeQuery(sql) ?: return emptyList()
+
+        val results = Vector<T>()
+
+        while (rs.next()) {
+            val m = mapModel(rs, clazz) ?: continue
+
+            results.add(m)
+        }
+
+        return results
+    } catch (e: Exception) {
+        // Log something? Throw error?
+    } finally {
+        stmt?.close()
+        rs?.close()
+    }
+
+    return emptyList()
+}
+
+private fun <T> executeStoredProcWithResults(conn: Connection, sql: String, parameters: Map<String, Any?>, clazz: Class<T>): List<T> {
+    var stmt: CallableStatement? = null
+    var rs: ResultSet? = null
+
+    try {
+        val escapedSql = jdbcEscape(sql, parameters)
+
+        stmt = conn.prepareCall(escapedSql) ?: return emptyList()
+
+        if (parameters.count() > 0) {
+            for ((key, value) in parameters)
+                stmt.setObject(key, value)
+        }
+
+        stmt.execute()
+
+        rs = stmt.resultSet ?: return emptyList()
+
+        val results = Vector<T>()
+
+        while (rs.next()) {
+            val m = mapModel(rs, clazz) ?: continue
+
+            results.add(m)
+        }
+
+        return results
+    } catch (e: SQLException) {
+        println(e.message)
+        // Log something? Throw something?
+    } finally {
+        stmt?.close()
+        rs?.close()
+    }
+
+    return emptyList()
 }

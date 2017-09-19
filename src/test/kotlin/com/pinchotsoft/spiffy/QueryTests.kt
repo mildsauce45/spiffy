@@ -6,7 +6,7 @@ import com.pinchotsoft.spiffy.sqlserver.SqlServerDriverProvider
 import org.junit.Before
 import org.junit.Test
 
-class ConnectionExtensionsTest {
+class QueryTests {
     private val connString = "jdbc:sqlserver://localhost;instanceName=sqlexpress;databaseName=Core;integratedSecurity=false;"
     private val user = "s.mctesterson"
     private val pass = "mib20!!"
