@@ -97,4 +97,21 @@ class QueryTests {
             assert(result.name != "")
         }
     }
+
+    @Test
+    fun test_query_selectUntypedResults() {
+        connectionFactory.get(connString, user, pass).use {
+            val result = it.query("select * from cards")
+
+            assert(result.count() > 1)
+
+            val card = result.first()
+
+            assert(card.containsKey("Id"))
+            assert(card.containsKey("Name"))
+            assert(card.containsKey("Text"))
+            assert(card.containsKey("Cost"))
+            assert(card.containsKey("CardType"))
+        }
+    }
 }

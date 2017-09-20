@@ -36,4 +36,24 @@ class SprocTests {
             assert(res.first().name != "")
         }
     }
+
+    @Test
+    fun test_sproc_withUntypedResults() {
+        connectionFactory.get(connString, user, pass).use {
+            val res = it.query("spGetCardsForUser", mapOf("UserId" to 1), commandType = CommandType.STORED_PROCEDURE)
+
+            assert(res.count() > 1)
+
+            val card = res.first()
+
+            assert(card.containsKey("Id"))
+            assert(card.containsKey("Name"))
+            assert(card.containsKey("Text"))
+            assert(card.containsKey("Cost"))
+            assert(card.containsKey("CardType"))
+
+            // This is different than the typed results because our model doesn't throw it out
+            assert(card.containsKey("Quantity"))
+        }
+    }
 }
