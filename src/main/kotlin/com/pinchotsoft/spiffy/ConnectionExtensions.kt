@@ -62,20 +62,13 @@ fun Connection.query(sql:String, parameters: Map<String, Any?>? = null, commandT
  * Will return null if a Statement was not created or an exception occurred during the execution of the sql.
  * Returns the result of the statement otherwise. See Statement.execute for more information.
  */
-fun Connection.execute(sql:String, parameters: Map<String, Any?>): Boolean? {
-    return execute(insertMapValues(sql, parameters))
-}
-
-/**
- * Executes the given sql string. Will return null if a Statement was not created or an exception occurred during the execution of the sql.
- * Returns the result of the statement otherwise. See Statement.execute for more information.
- */
-fun Connection.execute(sql:String): Boolean? {
+fun Connection.execute(sql:String, parameters: Map<String, Any?>? = null): Boolean? {
     var stmt: Statement? = null
 
     try {
         stmt = this.createStatement() ?: return null
-        return stmt.execute(sql)
+
+        return stmt.execute(insertMapValues(sql, parameters))
     } catch (e: Exception) {
         // Log something? Throw error?
     } finally {
