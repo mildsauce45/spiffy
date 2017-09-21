@@ -108,14 +108,12 @@ class QueryTests {
     fun test_query_northwind_benchmarks() {
         TestHelpers.getNorthwindConnection().use {
             var result: List<Order>? = null
-            val start = System.currentTimeMillis()
 
-            (1..500).forEach { _ -> result = it.query("select * from orders", Order::class.java) }
-
-            assert(result != null)
-            assert(result!!.count() > 1)
-
-            var totalTime = System.currentTimeMillis() - start
+            val totalTime = Stopwatch.elapse {
+                (1..500).forEach { _ -> result = it.query("select * from orders", Order::class.java) }
+                assert(result != null)
+                assert(result!!.count() > 1)
+            }
 
             assert(totalTime < 2000)
         }
