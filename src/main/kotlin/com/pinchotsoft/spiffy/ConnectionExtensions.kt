@@ -50,7 +50,7 @@ fun <T> Connection.query(sql: String, clazz: Class<T>, commandType: CommandType 
         executeStoredProcWithResults(this, sql, emptyMap(), clazz)
 }
 
-fun Connection.query(sql:String, parameters: Map<String, Any?>? = null, commandType: CommandType = CommandType.TEXT): List<Map<String, Any?>> {
+fun Connection.query(sql: String, parameters: Map<String, Any?>? = null, commandType: CommandType = CommandType.TEXT): List<Map<String, Any?>> {
     return if (commandType == CommandType.TEXT)
         executeTextCommandWithResults(this, insertMapValues(sql, parameters))
     else
@@ -62,7 +62,7 @@ fun Connection.query(sql:String, parameters: Map<String, Any?>? = null, commandT
  * Will return null if a Statement was not created or an exception occurred during the execution of the sql.
  * Returns the result of the statement otherwise. See Statement.execute for more information.
  */
-fun Connection.execute(sql:String, parameters: Map<String, Any?>? = null): Boolean? {
+fun Connection.execute(sql: String, parameters: Map<String, Any?>? = null): Boolean? {
     var stmt: Statement? = null
 
     try {
@@ -71,6 +71,7 @@ fun Connection.execute(sql:String, parameters: Map<String, Any?>? = null): Boole
         return stmt.execute(insertMapValues(sql, parameters))
     } catch (e: Exception) {
         // Log something? Throw error?
+        println(e.message)
     } finally {
         stmt?.close()
     }
