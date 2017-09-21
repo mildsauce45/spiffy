@@ -26,7 +26,7 @@ class ExecuteTests {
     fun test_execute_performUpdate() {
         TestHelpers.getConnection().use {
             val fetchSql = "select * from users where username = 'jdarkmagic'"
-            var updateSql = "update users set firstName = @FIRSTNAME"
+            val updateSql = "update users set firstName = @FIRSTNAME"
 
             val expectedName = "Jim"
             val testUpdateName = "Gabe"

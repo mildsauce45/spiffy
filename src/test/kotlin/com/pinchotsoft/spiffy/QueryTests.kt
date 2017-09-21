@@ -2,6 +2,7 @@ package com.pinchotsoft.spiffy
 
 import com.pinchotsoft.spiffy.models.Card
 import com.pinchotsoft.spiffy.models.Card2
+import com.pinchotsoft.spiffy.models.Order
 import org.junit.Test
 
 class QueryTests {
@@ -100,6 +101,23 @@ class QueryTests {
             assert(card.containsKey("Text"))
             assert(card.containsKey("Cost"))
             assert(card.containsKey("CardType"))
+        }
+    }
+
+    @Test
+    fun test_query_northwind_benchmarks() {
+        TestHelpers.getNorthwindConnection().use {
+            var result: List<Order>? = null
+            val start = System.currentTimeMillis()
+
+            (1..500).forEach { _ -> result = it.query("select * from orders", Order::class.java) }
+
+            assert(result != null)
+            assert(result!!.count() > 1)
+
+            var totalTime = System.currentTimeMillis() - start
+
+            assert(totalTime < 2000)
         }
     }
 }
