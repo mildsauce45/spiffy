@@ -1,4 +1,4 @@
-package com.pinchotsoft.spiffy
+package com.pinchotsoft.spiffy.utilities
 
 class Stopwatch {
     companion object {

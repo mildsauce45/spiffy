@@ -3,6 +3,7 @@ package com.pinchotsoft.spiffy
 import com.pinchotsoft.spiffy.models.Card
 import com.pinchotsoft.spiffy.models.Card2
 import com.pinchotsoft.spiffy.models.Order
+import com.pinchotsoft.spiffy.utilities.Stopwatch
 import org.junit.Test
 
 class QueryTests {
@@ -107,13 +108,13 @@ class QueryTests {
     @Test
     fun test_query_northwind_benchmarks() {
         TestHelpers.getNorthwindConnection().use {
-            var result: List<Order>? = null
+            val clazz = Order::class.java
 
             val totalTime = Stopwatch.elapse {
-                (1..500).forEach { _ -> result = it.query("select * from orders", Order::class.java) }
-                assert(result != null)
-                assert(result!!.count() > 1)
+                (1..500).forEach { _ -> it.query("select * from orders", clazz) }
             }
+
+            println(totalTime)
 
             assert(totalTime < 2000)
         }

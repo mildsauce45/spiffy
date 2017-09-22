@@ -1,5 +1,8 @@
 package com.pinchotsoft.spiffy
 
+import com.pinchotsoft.spiffy.mapping.ResultContext
+import com.pinchotsoft.spiffy.mapping.mapModel
+import com.pinchotsoft.spiffy.utilities.Stopwatch
 import java.sql.*
 import java.util.Vector
 
@@ -97,13 +100,19 @@ private fun insertMapValues(sql: String, parameters: Map<String, Any?>?): String
 private fun <T> executeTextCommandWithResults(conn: Connection, sql: String, clazz: Class<T>): List<T> {
     val results = Vector<T>()
 
-    executeTextCommand(conn, sql) {
-        while (it.next()) {
-            val m = mapModel(it, clazz) ?: continue
+    val totalExecutionTime = Stopwatch.elapse {
+        executeTextCommand(conn, sql) {
+            val context = ResultContext(it, clazz)
 
-            results.add(m)
+            while (it.next()) {
+                val m = mapModel(it, context, clazz) //?: continue
+
+                results.add(m)
+            }
         }
     }
+
+    println("Execution Time: $totalExecutionTime")
 
     return results
 }
@@ -112,8 +121,10 @@ private fun <T> executeStoredProcWithResults(conn: Connection, sql: String, para
     val results = Vector<T>()
 
     executeStoredProcCommand(conn, sql, parameters) {
+        val context = ResultContext(it, clazz)
+
         while (it.next()) {
-            val m = mapModel(it, clazz) ?: continue
+            val m = mapModel(it, context, clazz) ?: continue
 
             results.add(m)
         }
