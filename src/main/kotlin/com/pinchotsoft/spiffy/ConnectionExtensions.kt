@@ -100,19 +100,16 @@ private fun insertMapValues(sql: String, parameters: Map<String, Any?>?): String
 private fun <T> executeTextCommandWithResults(conn: Connection, sql: String, clazz: Class<T>): List<T> {
     val results = Vector<T>()
 
-    val totalExecutionTime = Stopwatch.elapse {
-        executeTextCommand(conn, sql) {
-            val context = ResultContext(it, clazz)
+    executeTextCommand(conn, sql) {
+        val context = ResultContext(it, clazz)
 
-            while (it.next()) {
-                val m = mapModel(it, context, clazz) //?: continue
+        while (it.next()) {
+            val m = mapModel(it, context, clazz) //?: continue
 
-                results.add(m)
-            }
+            results.add(m)
         }
     }
 
-    println("Execution Time: $totalExecutionTime")
 
     return results
 }

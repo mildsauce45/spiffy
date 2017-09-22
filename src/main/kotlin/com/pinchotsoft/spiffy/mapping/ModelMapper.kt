@@ -12,7 +12,7 @@ fun <T> mapModel(rs: ResultSet, context: ResultContext, clazz: Class<T>): T {
     }
 
     return if (!context.isDataClass)
-        mapPojo(rs, context.constructor, clazz)
+        mapPojo(rs, context.constructor!!, clazz)
     else
         mapDataClass(rs, context, clazz)
 }
@@ -49,5 +49,5 @@ private fun <T> mapDataClass(rs: ResultSet, context: ResultContext, clazz: Class
     }
 
     @Suppress("UNCHECKED_CAST")
-    return context.constructor.newInstance(*(constructorArgs.toArray())) as T
+    return context.constructor!!.newInstance(*(constructorArgs.toArray())) as T
 }

@@ -104,19 +104,4 @@ class QueryTests {
             assert(card.containsKey("CardType"))
         }
     }
-
-    @Test
-    fun test_query_northwind_benchmarks() {
-        TestHelpers.getNorthwindConnection().use {
-            val clazz = Order::class.java
-
-            val totalTime = Stopwatch.elapse {
-                (1..500).forEach { _ -> it.query("select * from orders", clazz) }
-            }
-
-            println(totalTime)
-
-            assert(totalTime < 2000)
-        }
-    }
 }

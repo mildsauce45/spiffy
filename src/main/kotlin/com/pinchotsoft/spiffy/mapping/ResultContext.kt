@@ -8,10 +8,17 @@ import java.sql.ResultSet
 class ResultContext(rs: ResultSet, clazz: Class<*>) {
     private val columns: List<String>
     private val calculatedColumnAvailability = HashMap<String, Boolean>()
+    private var _constructor: Constructor<*>? = null
+    private var _isDataClass = false
 
     val isPrimitiveType: Boolean
-    val constructor: Constructor<*>
+
     val isDataClass: Boolean
+        get() = _isDataClass
+
+    val constructor: Constructor<*>?
+        get() = _constructor
+
 
     init {
         val metadata = rs.metaData
@@ -20,13 +27,14 @@ class ResultContext(rs: ResultSet, clazz: Class<*>) {
 
         isPrimitiveType = isPrimitive(clazz)
 
-        val cons = ReflectionHelper.getClassConstructor(clazz, true)
-        if (cons != null) {
-            constructor = cons
-            isDataClass = false
-        } else {
-            constructor = ReflectionHelper.getClassConstructor(clazz, false)!!
-            isDataClass = true
+        if (!isPrimitiveType) {
+            val cons = ReflectionHelper.getClassConstructor(clazz, true)
+            if (cons != null) {
+                _constructor = cons
+            } else {
+                _constructor = ReflectionHelper.getClassConstructor(clazz, false)!!
+                _isDataClass = true
+            }
         }
     }
 
