@@ -5,7 +5,7 @@ A kotlin micro-ORM based on the dapper c# project
 
 Coming from a .NET fullstack background, I've come to rely heavily on Dapper (https://github.com/StackExchange/Dapper) for database access.
 It's quick, easy to use, and allows for hand tuning of queries in a way that Entity Framework just doesn't. 
-As a way to teach myself Kotlin and familiarize myself with the Java development stack, I decided to try may hand at making a similar micro-ORM in Kotlin.
+As a way to teach myself Kotlin and familiarize myself with the Java development stack, I decided to try my hand at making a similar micro-ORM in Kotlin.
 
 ## Features
 
