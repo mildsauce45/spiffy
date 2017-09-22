@@ -14,6 +14,9 @@ As a way to teach myself Kotlin and familiarize myself with the Java development
 * Supports Stored procedure calls
 * Supports parameterization of sql queries in a number of ways
 
+## Benchmarks
+Currently spiffy is reporting ~250ms for 500 selects in the Northwind DB against the Orders table, the bulk of which is taken up by the first call, as the caches of reflection information get primed. This is decent, but I'd like to get it down to roughly the performance of the sql2o project. After a little more tuning, I'll create a fancy table reporting more concrete stats. 
+
 ### Result Types
 
 Primitives
