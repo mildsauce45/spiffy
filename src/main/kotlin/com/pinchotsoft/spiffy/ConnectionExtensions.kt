@@ -2,7 +2,6 @@ package com.pinchotsoft.spiffy
 
 import com.pinchotsoft.spiffy.mapping.ResultContext
 import com.pinchotsoft.spiffy.mapping.mapModel
-import com.pinchotsoft.spiffy.utilities.Stopwatch
 import java.sql.*
 import java.util.Vector
 
@@ -88,7 +87,7 @@ private fun insertMapValues(sql: String, parameters: Map<String, Any?>?): String
     if (parameters != null && parameters.count() > 0) {
         for ((key, value) in parameters) {
             val rgx = Regex("@$key", RegexOption.IGNORE_CASE)
-            val sqlValue = if (shouldQuote(value!!::class.java)) "'$value'" else value.toString()
+            val sqlValue = if (value == null) "null" else if (shouldQuote(value::class.java)) "'$value'" else value.toString()
 
             localSql = localSql.replace(rgx, sqlValue)
         }

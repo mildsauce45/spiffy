@@ -104,4 +104,13 @@ class QueryTests {
             assert(card.containsKey("CardType"))
         }
     }
+
+    @Test
+    fun test_query_filtingWithNull() {
+        TestHelpers.getNorthwindConnection().use {
+            val result = it.query("select * from orders where shippeddate is @NULLPARAM", mapOf("nullparam" to null))
+
+            assert(result.count() > 1)
+        }
+    }
 }

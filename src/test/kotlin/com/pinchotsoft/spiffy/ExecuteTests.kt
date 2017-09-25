@@ -46,4 +46,21 @@ class ExecuteTests {
             it.execute(updateSql, mapOf("firstName" to expectedName))
         }
     }
+
+    @Test
+    fun test_execute_performInsertWithNull() {
+        TestHelpers.getConnection().use {
+            val countSql = "select count(*) from TestInsertTable"
+
+            val initialCount = it.query(countSql, clazz = Int::class.java).firstOrNull()
+
+            assert(initialCount != null)
+
+            it.execute("insert into TestInsertTable(Name, Description) values (@name, @desc)", mapOf("name" to "Bar", "desc" to null ))
+
+            val finalCount = it.query(countSql, clazz = Int::class.java).firstOrNull()
+
+            assert(finalCount != null && finalCount > initialCount!!)
+        }
+    }
 }
