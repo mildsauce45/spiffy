@@ -10,7 +10,7 @@ As a way to teach myself Kotlin and familiarize myself with the Java development
 ## Features
 
 * Works as extension methods off of the standard `java.sql.Connection` interface and will support any database with a driver you've registered
-* Supports Kotlin data classes, POJOs, and primitives as result types
+* Supports Kotlin data classes, POJOs, scalars, and untyped maps as result types
 * Supports Stored procedure calls
 * Supports parameterization of sql queries in a number of ways
 * Supports iterables as parameters to a sql query
@@ -20,7 +20,7 @@ Currently spiffy is reporting ~250ms for 500 selects in the Northwind DB against
 
 ### Result Types
 
-Primitives
+Scalars
 
 ```kotlin
 connectionFactory.get().use {
@@ -44,6 +44,14 @@ Kotlin Data Classes
 
 ```kotlin
 data class Card(var id: Int, var name: String, var text: String?, var cardType: Int, var cost: Int)
+```
+
+Untyped Maps
+
+```kotlin
+connectionFactory.get().use {
+    val results: Map<String, Any?> = it.query("select * from orders")
+}
 ```
 
 ### Stored Produced Calls
