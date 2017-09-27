@@ -13,6 +13,7 @@ As a way to teach myself Kotlin and familiarize myself with the Java development
 * Supports Kotlin data classes, POJOs, and primitives as result types
 * Supports Stored procedure calls
 * Supports parameterization of sql queries in a number of ways
+* Supports iterables as parameters to a sql query
 
 ## Benchmarks
 Currently spiffy is reporting ~250ms for 500 selects in the Northwind DB against the Orders table, the bulk of which is taken up by the first call, as the caches of reflection information get primed. This is decent, but I'd like to get it down to roughly the performance of the sql2o project. After a little more tuning, I'll create a fancy table reporting more concrete stats. 
@@ -84,4 +85,22 @@ connectionFactory.get().use {
 
     val result = it.query("select * from cards where Id = @id", template).firstOrNull()
 }
+```
+
+### Iterable Support
+
+Spiffy allows you to pass an Iterable<T> as a paramter and it will be expanded automatically.
+
+For example:
+
+```kotlin
+connectionFactory.get().use {
+   val result = it.query("select * from orders where employeeId in @employeeIds", mapOf("employeeIds" to listOf(1, 2, 3)", Order::class.java)
+}
+```
+
+Will be expanded to :
+
+```sql
+select * from orders where employeeId in (1, 2, 3)
 ```
