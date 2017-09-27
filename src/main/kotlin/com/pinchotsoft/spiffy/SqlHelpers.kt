@@ -2,6 +2,7 @@ package com.pinchotsoft.spiffy
 
 import java.lang.reflect.Field
 import java.util.UUID
+import com.pinchotsoft.spiffy.utilities.GenericStringTransformer
 
 fun shouldQuote(fieldType: Field): Boolean {
     return shouldQuote(fieldType.type)
@@ -20,3 +21,16 @@ fun jdbcEscape(sproc: String, inputParams: Map<String, Any?>): String {
         "{call ${sproc}(${parmString})}"
     }
 }
+
+inline fun <reified T> getStringValue(obj: T):String where T : Any {
+    return GenericStringTransformer<Iterable<T>>().transformToString(obj) {
+        val isQuotable = shouldQuote(T::class.java)
+
+        @Suppress("UNCHECKED_CAST")
+        (it as Iterable<T>).joinToString(prefix = "(", postfix = ")", separator = ",") { if (isQuotable) "'$it'" else "$it" }
+    }
+}
+
+
+
+

@@ -113,4 +113,16 @@ class QueryTests {
             assert(result.count() > 1)
         }
     }
+
+    @Test
+    fun test_query_selectWithIterable() {
+        TestHelpers.getNorthwindConnection().use {
+            val result = it.query("select distinct EmployeeId from Orders where EmployeeId in @EmployeeIds", mapOf("employeeIds" to listOf(1, 2, 3)), Int::class.java)
+
+            assert(result.count() == 3)
+            assert(result.contains(1))
+            assert(result.contains(2))
+            assert(result.contains(3))
+        }
+    }
 }

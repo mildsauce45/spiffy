@@ -3,13 +3,14 @@ version '0.1-SNAPSHOT'
 
 buildscript {
     ext.kotlin_version = '1.1.4-3'
+    ext.kotlin_gradle_version = '1.1.50'
 
     repositories {
         mavenCentral()
     }
 
     dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlin_gradle_version}"
     }
 }
 
@@ -20,7 +21,7 @@ repositories {
 }
 
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:${kotlin_gradle_version}"
     compile "com.microsoft.sqlserver:mssql-jdbc:6.2.1.jre8"
 
     testCompile 'junit:junit:4.12'
