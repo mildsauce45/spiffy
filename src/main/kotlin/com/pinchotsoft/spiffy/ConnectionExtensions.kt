@@ -52,6 +52,9 @@ fun <T> Connection.query(sql: String, clazz: Class<T>, commandType: CommandType 
         executeStoredProcWithResults(this, sql, emptyMap(), clazz)
 }
 
+/**
+ * Executes the given sql and returns a list of Map<String, Any?>
+ */
 fun Connection.query(sql: String, parameters: Map<String, Any?>? = null, commandType: CommandType = CommandType.TEXT): List<Map<String, Any?>> {
     return if (commandType == CommandType.TEXT)
         executeTextCommandWithResults(this, insertMapValues(sql, parameters))

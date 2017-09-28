@@ -11,9 +11,13 @@ class ConnectionFactory(private val driverProvider: DbDriverProvider) {
         val PASSWORD = "DB_PASSWORD"
     }
 
+    private var isInitialized = false
+
     fun get(connString: String, user: String, pass: String): Connection {
-        if (!driverProvider.isRegistered)
+        if (!isInitialized) {
             DriverManager.registerDriver(driverProvider.getDriver())
+            isInitialized = true
+        }
 
         return DriverManager.getConnection(connString, user, pass)
     }
