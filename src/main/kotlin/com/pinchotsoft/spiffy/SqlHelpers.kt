@@ -14,11 +14,11 @@ fun shouldQuote(clazz: Class<*>): Boolean {
 
 fun jdbcEscape(sproc: String, inputParams: Map<String, Any?>): String {
     return if (inputParams.count() == 0)
-        "{call ${sproc}}"
+        "{call $sproc}"
     else {
-        val parmString = inputParams.map { "?" }.joinToString(", ")
+        val parmString = (inputParams.map { "?" }).joinToString(", ")
 
-        "{call ${sproc}(${parmString})}"
+        "{call $sproc($parmString)}"
     }
 }
 
