@@ -1,5 +1,5 @@
 # spiffy
-A kotlin micro-ORM based on the dapper c# project
+A kotlin micro ORM based on the dapper c# project
 
 ## Intro
 
