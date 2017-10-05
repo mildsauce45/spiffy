@@ -22,6 +22,38 @@ fun jdbcEscape(sproc: String, inputParams: Map<String, Any?>): String {
     }
 }
 
+fun transformSql(sql: String, inputParams: Map<String, Any?>): Pair<String, Map<Int, Any?>> {
+
+    var paramIndex = 1
+    var transformedSql = sql
+    val transformedParams = HashMap<Int, Any?>()
+
+    var strSearchIdx = 0
+    while (strSearchIdx < transformedSql.length) {
+        val currChar = transformedSql[strSearchIdx]
+
+        if (currChar == ':' || currChar == '@') {
+            var paramEndIndex = strSearchIdx + 1
+
+            while(paramEndIndex < transformedSql.length && transformedSql[paramEndIndex].isLetterOrDigit())
+                paramEndIndex++
+
+            val paramName = transformedSql.substring(strSearchIdx + 1, paramEndIndex)
+
+            val paramFromMap = inputParams.keys.firstOrNull { it.equals(paramName, ignoreCase = true) }
+
+            if (paramFromMap != null) {
+                transformedSql = transformedSql.replace(Regex("[@:]$paramName"), "?")
+                transformedParams.put(paramIndex++, inputParams[paramFromMap])
+            }
+        }
+
+        strSearchIdx++
+    }
+
+    return Pair(transformedSql, transformedParams)
+}
+
 inline fun <reified T> getStringValue(obj: T):String where T : Any {
     return GenericStringTransformer<Iterable<T>>().transformToString(obj) {
         val isQuotable = shouldQuote(T::class.java)

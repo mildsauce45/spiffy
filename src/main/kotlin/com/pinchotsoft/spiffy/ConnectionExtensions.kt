@@ -11,7 +11,7 @@ import java.util.Vector
  */
 fun <T> Connection.query(sql: String, parameters: Map<String, Any?>, clazz: Class<T>, commandType: CommandType = CommandType.TEXT): List<T> {
     return if (commandType == CommandType.TEXT)
-        query(insertMapValues(sql, parameters), clazz, commandType)
+        executeTextCommandWithResults(this, sql, clazz, parameters)
     else
         executeStoredProcWithResults(this, sql, parameters, clazz)
 }
@@ -57,7 +57,7 @@ fun <T> Connection.query(sql: String, clazz: Class<T>, commandType: CommandType 
  */
 fun Connection.query(sql: String, parameters: Map<String, Any?>? = null, commandType: CommandType = CommandType.TEXT): List<Map<String, Any?>> {
     return if (commandType == CommandType.TEXT)
-        executeTextCommandWithResults(this, insertMapValues(sql, parameters))
+        executeTextCommandWithResults(this, sql, parameters)
     else
         executeStoredProcWithResults(this, sql, parameters ?: emptyMap())
 }
@@ -99,10 +99,11 @@ private fun insertMapValues(sql: String, parameters: Map<String, Any?>?): String
     return localSql
 }
 
-private fun <T> executeTextCommandWithResults(conn: Connection, sql: String, clazz: Class<T>): List<T> {
+private fun <T> executeTextCommandWithResults(conn: Connection, sql: String, clazz: Class<T>, parameters: Map<String, Any?>? = null): List<T> {
     val results = Vector<T>()
+    val parms = parameters ?: emptyMap()
 
-    executeTextCommand(conn, sql) {
+    executeTextCommand(conn, sql, parms) {
         val context = ResultContext(it, clazz)
 
         while (it.next()) {
@@ -132,10 +133,11 @@ private fun <T> executeStoredProcWithResults(conn: Connection, sql: String, para
     return results
 }
 
-private fun executeTextCommandWithResults(conn: Connection, sql: String): List<Map<String, Any?>> {
+private fun executeTextCommandWithResults(conn: Connection, sql: String, parameters: Map<String, Any?>? = null): List<Map<String, Any?>> {
     val results = Vector<Map<String, Any?>>()
+    val parms = parameters ?: emptyMap()
 
-    executeTextCommand(conn, sql) {
+    executeTextCommand(conn, sql, parms) {
         val metadata = it.metaData
         val columnNames = (1..metadata.columnCount).map { metadata.getColumnName(it) }
 
@@ -172,13 +174,21 @@ private fun executeStoredProcWithResults(conn: Connection, sql: String, paramete
     return results
 }
 
-private fun executeTextCommand(conn: Connection, sql: String, mapper: (ResultSet) -> Unit) {
-    var stmt: Statement? = null
+private fun executeTextCommand(conn: Connection, sql: String, parameters: Map<String, Any?>, mapper: (ResultSet) -> Unit) {
+    var stmt: PreparedStatement? = null
     var rs: ResultSet? = null
 
     try {
-        stmt = conn.createStatement() ?: return
-        rs = stmt.executeQuery(sql) ?: return
+        val (transformedSql, transformedInputs) = transformSql(sql, parameters)
+
+        stmt = conn.prepareStatement(transformedSql) ?: return
+
+        if (transformedInputs.count() > 0) {
+            for ((key, value) in transformedInputs)
+                stmt.setObject(key, value)
+        }
+
+        rs = stmt.executeQuery() ?: return
 
         mapper(rs)
     } catch (e: Exception) {
