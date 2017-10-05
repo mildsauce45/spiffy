@@ -43,8 +43,17 @@ fun transformSql(sql: String, inputParams: Map<String, Any?>): Pair<String, Map<
             val paramFromMap = inputParams.keys.firstOrNull { it.equals(paramName, ignoreCase = true) }
 
             if (paramFromMap != null) {
-                transformedSql = transformedSql.replace(Regex("[@:]$paramName"), "?")
-                transformedParams.put(paramIndex++, inputParams[paramFromMap])
+                // Nulls are special cased here. Since I really don't want more reflection, and JDBC still needs to
+                // know the nullable type, I'm going to keep the string replacement.
+                val paramValue = inputParams[paramFromMap]
+                val replacementRegex = Regex("[@:]$paramName")
+
+                if (paramValue == null) {
+                    transformedSql = transformedSql.replace(replacementRegex, "NULL")
+                } else {
+                    transformedSql = transformedSql.replace(replacementRegex, "?")
+                    transformedParams.put(paramIndex++, paramValue)
+                }
             }
         }
 
