@@ -11,4 +11,11 @@ class GenericStringTransformer<out T : Any>(private val clazz: Class<T>) {
             else -> t.toString()
         }
     }
+
+    fun transform(t: Any, transform: (Any, Boolean) -> Pair<String, Map<String, Any?>>): Pair<String, Map<String, Any?>> {
+        return when {
+            clazz.isAssignableFrom(t.javaClass) -> transform(t, true)
+            else -> transform(t, false)
+        }
+    }
 }

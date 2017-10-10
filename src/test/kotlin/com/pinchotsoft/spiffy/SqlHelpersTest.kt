@@ -31,4 +31,19 @@ class SqlHelpersTest {
         assert(transformedInputs[1] == 1)
         assert(transformedInputs[2] == 3)
     }
+
+    @Test
+    fun sqlHelpers_transformSql_handlesIterables() {
+        val initialQuery = "select * from orders where Id in @Ids"
+        val desiredQuery = "select * from orders where Id in (?,?,?)"
+        val inputs = mapOf("Ids" to listOf(1, 2, 3))
+
+        val (transformedSql, transformedInputs) = transformSql(initialQuery, inputs)
+
+        assert(transformedSql == desiredQuery)
+        assert(transformedInputs.count() == 3)
+        assert(transformedInputs.containsValue(1))
+        assert(transformedInputs.containsValue(2))
+        assert(transformedInputs.containsValue(3))
+    }
 }
