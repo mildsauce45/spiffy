@@ -1,11 +1,6 @@
 package com.pinchotsoft.spiffy
 
-import java.util.UUID
 import com.pinchotsoft.spiffy.utilities.GenericStringTransformer
-
-fun shouldQuote(clazz: Class<*>): Boolean {
-    return clazz == String::class.java || clazz == UUID::class.java
-}
 
 fun jdbcEscape(sproc: String, inputParams: Map<String, Any?>): String {
     return if (inputParams.count() == 0)
@@ -105,16 +100,3 @@ inline fun <reified T> transformIterableSql(sql: String, key: String, obj: T): P
         }
     }
 }
-
-inline fun <reified T> getStringValue(obj: T):String where T : Any {
-    return GenericStringTransformer<Iterable<T>>().transformToString(obj) {
-        val isQuotable = shouldQuote(T::class.java)
-
-        @Suppress("UNCHECKED_CAST")
-        (it as Iterable<T>).joinToString(prefix = "(", postfix = ")", separator = ",") { if (isQuotable) "'$it'" else "$it" }
-    }
-}
-
-
-
-

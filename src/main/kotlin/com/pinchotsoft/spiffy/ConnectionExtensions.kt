@@ -57,35 +57,26 @@ fun Connection.query(sql: String, parameters: Map<String, Any?>? = null, command
  * Returns the result of the statement otherwise. See Statement.execute for more information.
  */
 fun Connection.execute(sql: String, parameters: Map<String, Any?>? = null): Boolean? {
-    var stmt: Statement? = null
+    var stmt: PreparedStatement? = null
 
     try {
-        stmt = this.createStatement() ?: return null
+        val (transformedSql, transformedInputs) = transformSql(sql, parameters ?: emptyMap())
 
-        return stmt.execute(insertMapValues(sql, parameters))
+        stmt = this.prepareStatement(transformedSql) ?: return null
+
+        if (transformedInputs.count() > 0) {
+            for ((key, value) in transformedInputs)
+                stmt.setObject(key, value)
+        }
+
+        return stmt.execute()
     } catch (e: Exception) {
         // Log something? Throw error?
-        println(e.message)
     } finally {
         stmt?.close()
     }
 
     return null
-}
-
-private fun insertMapValues(sql: String, parameters: Map<String, Any?>?): String {
-    var localSql = sql
-
-    if (parameters != null && parameters.count() > 0) {
-        for ((key, value) in parameters) {
-            val rgx = Regex("@$key", RegexOption.IGNORE_CASE)
-            val sqlValue = if (value == null) "null" else if (shouldQuote(value::class.java)) "'$value'" else getStringValue(value)
-
-            localSql = localSql.replace(rgx, sqlValue)
-        }
-    }
-
-    return localSql
 }
 
 private fun <T> executeTextCommandWithResults(conn: Connection, sql: String, clazz: Class<T>, parameters: Map<String, Any?>? = null): List<T> {

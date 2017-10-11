@@ -4,16 +4,6 @@ import java.lang.reflect.Constructor
 import java.lang.reflect.Field
 import java.lang.reflect.Method
 
-fun <T> getField(fieldName: String, clazz: Class<T>): Field? {
-    return ReflectionHelper.getFieldsForClass(clazz).firstOrNull { it.name.equals(fieldName, true) }
-}
-
-fun <T> getFieldValue(obj: T, fieldName: String, clazz: Class<T>): Any? {
-    val field = getField(fieldName, clazz) ?: return null
-
-    return getFieldValue(obj, field, clazz)
-}
-
 fun <T> getFieldValue(obj: T, field: Field, clazz: Class<T>): Any? {
     val getter = ReflectionHelper.getGetterForField(clazz, field.name) ?: return null
 
