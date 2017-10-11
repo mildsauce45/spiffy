@@ -21,25 +21,14 @@ fun <T> Connection.query(sql: String, parameters: Map<String, Any?>, clazz: Clas
  * Returns a list of the given type from the result set.
  */
 fun <T> Connection.query(sql: String, template: T, commandType: CommandType = CommandType.TEXT): List<T> where T : kotlin.Any {
-    val extractRegex = Regex("@[a-zA-Z]+")
-
-    val matches = extractRegex.findAll(sql)
     val clazz = template.javaClass
+    val fields = ReflectionHelper.getFieldsForClass(clazz)
+    val inputMap = HashMap<String, Any?>()
 
-    var localSql = sql
+    for (f in fields)
+        inputMap.put(f.name, getFieldValue(template, f, clazz))
 
-    for (m in matches) {
-        val field = getField(m.value.substring(1), clazz) ?: continue
-        var fieldValue = getFieldValue(template, field, clazz)
-
-        if (fieldValue != null) {
-            fieldValue = if (shouldQuote(field)) "'$fieldValue'" else fieldValue.toString()
-
-            localSql = localSql.replace(m.value, fieldValue)
-        }
-    }
-
-    return query(localSql, clazz, commandType)
+    return query(sql, inputMap, clazz, commandType)
 }
 
 /**
