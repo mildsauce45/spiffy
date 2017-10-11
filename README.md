@@ -110,5 +110,5 @@ connectionFactory.get().use {
 Will be expanded to :
 
 ```sql
-select * from orders where employeeId in (1, 2, 3)
+select * from orders where employeeId in (@employeeId1, @employeeId2, @employeeId3)
 ```
