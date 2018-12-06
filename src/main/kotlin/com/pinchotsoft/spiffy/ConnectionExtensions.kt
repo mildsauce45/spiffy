@@ -172,7 +172,7 @@ private fun executeTextCommand(conn: Connection, sql: String, parameters: Map<St
 
         mapper(rs)
     } catch (e: Exception) {
-        // Log something? Throw error?
+        throw e // Log something?
     } finally {
         stmt?.close()
         rs?.close()
@@ -199,7 +199,7 @@ private fun executeStoredProcCommand(conn: Connection, sql: String, parameters: 
 
         mapper(rs)
     } catch (e: Exception) {
-        // Log something? Throw error?
+        throw e // Log something?
     } finally {
         stmt?.close()
         rs?.close()
