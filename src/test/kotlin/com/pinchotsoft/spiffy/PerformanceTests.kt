@@ -9,11 +9,11 @@ class PerformanceTests {
 
     @Test
     fun test_query_benchmarks_dc() {
-        TestHelpers.getNorthwindConnection().use {
+        TestHelpers.getConnection().use {
             val clazz = Order::class.java
 
             val totalTime = Stopwatch.elapse {
-                (1..501).forEach { i -> it.query("select * from orders where Id = @Id", mapOf("id" to i), clazz) }
+                (10248..10749).forEach { i -> it.query("select * from orders where OrderId = @Id", mapOf("id" to i), clazz) }
             }
 
             assert(totalTime < 350)
@@ -22,11 +22,11 @@ class PerformanceTests {
 
     @Test
     fun test_query_pojo() {
-        TestHelpers.getNorthwindConnection().use {
+        TestHelpers.getConnection().use {
             val clazz = OrderPojo::class.java
 
             val totalTime = Stopwatch.elapse {
-                (1..501).forEach { i -> it.query("select * from orders where Id = @Id", mapOf("id" to i), clazz) }
+                (10248..10749).forEach { i -> it.query("select * from orders where OrderId = @Id", mapOf("id" to i), clazz) }
             }
 
             assert(totalTime < 350)
@@ -35,12 +35,12 @@ class PerformanceTests {
 
     @Test
     fun test_query_template() {
-        TestHelpers.getNorthwindConnection().use {
+        TestHelpers.getConnection().use {
             val totalTime = Stopwatch.elapse {
-                (1..501).forEach { i ->
+                (10248..10749).forEach { i ->
                     val template = Order(i, null, null, null, null, null, null, null, null, null, null, null, null, null)
 
-                    it.query("select * from orders where Id = @Id", template)
+                    it.query("select * from orders where OrderId = @OrderId", template)
                 }
             }
 
@@ -50,14 +50,14 @@ class PerformanceTests {
 
     @Test
     fun test_query_untypedMap() {
-        TestHelpers.getNorthwindConnection().use {
+        TestHelpers.getConnection().use {
             val totalTime = Stopwatch.elapse {
-                (1..501).forEach { i ->
-                    it.query("select * from orders where Id = @ID", mapOf("id" to i))
+                (10248..10749).forEach { i ->
+                    it.query("select orderId, customerID, employeeId, orderDate, requiredDate, shippedDate, shipVia, shipName, shipAddress, shipCity, shipRegion, shipPostalCode, shipCountry, freight from orders where OrderId = @ID", mapOf("id" to i))
                 }
             }
 
-            assert(totalTime < 300)
+            assert(totalTime < 400)
         }
     }
 }

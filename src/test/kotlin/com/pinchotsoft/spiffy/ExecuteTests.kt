@@ -1,6 +1,6 @@
 package com.pinchotsoft.spiffy
 
-import com.pinchotsoft.spiffy.models.User
+import com.pinchotsoft.spiffy.models.Product
 import org.junit.Test
 
 class ExecuteTests {
@@ -8,13 +8,13 @@ class ExecuteTests {
     @Test
     fun test_execute_performInsert() {
         TestHelpers.getConnection().use {
-            it.execute("truncate table TestInsertTable")
+            it.execute("truncate table Promotions")
 
-            var count = it.query("select count(*) from TestInsertTable", clazz = Int::class.java).firstOrNull()
+            var count = it.query("select count(*) from Promotions", clazz = Int::class.java).firstOrNull()
 
             assert(count != null && count == 0)
 
-            it.execute("insert into TestInsertTable (Name, Description) values (@Name, @Desc)", mapOf("name" to "Foo", "desc" to "Bar"))
+            it.execute("insert into Promotions (ProductId, Name, Description) values (@ProductId, @Name, @Desc)", mapOf("productId" to 1, "name" to "Foo", "desc" to "Bar"))
 
             count = it.query("select count(*) from TestInsertTable", clazz = Int::class.java).firstOrNull()
 
@@ -25,23 +25,23 @@ class ExecuteTests {
     @Test
     fun test_execute_performUpdate() {
         TestHelpers.getConnection().use {
-            val fetchSql = "select * from users where username = 'jdarkmagic'"
-            val updateSql = "update users set firstName = @FIRSTNAME"
+            val fetchSql = "select * from products where productId = 11"
+            val updateSql = "update products set productName = @PRODUCTNAME"
 
-            val expectedName = "Jim"
-            val testUpdateName = "Gabe"
+            val expectedName = "Queso Cabrales"
+            val testUpdateName = "Cheese Sauce"
 
-            val userToModify = it.query(fetchSql, User::class.java).firstOrNull()
+            val productToModify = it.query(fetchSql, Product::class.java).firstOrNull()
 
-            assert(userToModify != null)
-            assert(userToModify!!.firstName == expectedName)
+            assert(productToModify != null)
+            assert(productToModify!!.productName == expectedName)
 
-            it.execute(updateSql, mapOf("firstName" to testUpdateName))
+            it.execute(updateSql, mapOf("productName" to testUpdateName))
 
-            val modifiedUser = it.query(fetchSql, User::class.java).firstOrNull()
+            val modifiedProduct = it.query(fetchSql, Product::class.java).firstOrNull()
 
-            assert(modifiedUser != null)
-            assert(modifiedUser!!.firstName == testUpdateName)
+            assert(modifiedProduct != null)
+            assert(modifiedProduct!!.productName == testUpdateName)
 
             it.execute(updateSql, mapOf("firstName" to expectedName))
         }
@@ -50,13 +50,13 @@ class ExecuteTests {
     @Test
     fun test_execute_performInsertWithNull() {
         TestHelpers.getConnection().use {
-            val countSql = "select count(*) from TestInsertTable"
+            val countSql = "select count(*) from Promotions"
 
             val initialCount = it.query(countSql, clazz = Int::class.java).firstOrNull()
 
             assert(initialCount != null)
 
-            it.execute("insert into TestInsertTable(Name, Description) values (@name, @desc)", mapOf("name" to "Bar", "desc" to null ))
+            it.execute("insert into Promotions(ProductId, Name, Description) values (@productId, @name, @desc)", mapOf("productId" to 2, "name" to "Bar", "desc" to null ))
 
             val finalCount = it.query(countSql, clazz = Int::class.java).firstOrNull()
 

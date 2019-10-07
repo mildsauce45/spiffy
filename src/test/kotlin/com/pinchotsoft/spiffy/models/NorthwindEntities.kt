@@ -35,3 +35,29 @@ class OrderPojo {
     var shipCountry: String? = null
     var freight: BigDecimal? = null
 }
+
+data class Promotion(
+    var promotionId: Int,
+    var productId: Int,
+    var name: String,
+    var description: String?,
+    var isActive: Boolean
+)
+
+data class Product(
+    var productId: Int,
+    var productName: String,
+    var supplierId: Int?,
+    var categoryId: Int?,
+    var quantityPerUnit: String?,
+    var unitPrice: BigDecimal?,
+    var unitsInStock: Int?,
+    var unitsOnOrder: Int?,
+    var reorderLevel: Int?,
+    var discontinued: Boolean
+)
+
+data class OrderHistory(
+    var productName: String,
+    var total: Int
+)

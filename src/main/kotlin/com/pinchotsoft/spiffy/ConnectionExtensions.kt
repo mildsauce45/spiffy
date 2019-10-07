@@ -26,7 +26,7 @@ fun <T> Connection.query(sql: String, template: T, commandType: CommandType = Co
     val inputMap = HashMap<String, Any?>()
 
     for (f in fields)
-        inputMap.put(f.name, getFieldValue(template, f, clazz))
+        inputMap[f.name] = getFieldValue(template, f, clazz)
 
     return query(sql, inputMap, clazz, commandType)
 }
@@ -71,12 +71,10 @@ fun Connection.execute(sql: String, parameters: Map<String, Any?>? = null): Bool
 
         return stmt.execute()
     } catch (e: Exception) {
-        // Log something? Throw error?
+        throw e // Log something?
     } finally {
         stmt?.close()
     }
-
-    return null
 }
 
 private fun <T> executeTextCommandWithResults(conn: Connection, sql: String, clazz: Class<T>, parameters: Map<String, Any?>? = null): List<T> {
@@ -125,7 +123,7 @@ private fun executeTextCommandWithResults(conn: Connection, sql: String, paramet
             val currMap = HashMap<String, Any?>()
 
             for (name in columnNames)
-                currMap.put(name, it.getObject(name))
+                currMap[name] = it.getObject(name)
 
             results.add(currMap)
         }
@@ -145,7 +143,7 @@ private fun executeStoredProcWithResults(conn: Connection, sql: String, paramete
             val currMap = HashMap<String, Any?>()
 
             for (name in columnNames)
-                currMap.put(name, it.getObject(name))
+                currMap[name] = it.getObject(name)
 
             results.add(currMap)
         }

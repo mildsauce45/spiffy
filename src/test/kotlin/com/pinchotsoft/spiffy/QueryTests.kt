@@ -1,9 +1,7 @@
 package com.pinchotsoft.spiffy
 
-import com.pinchotsoft.spiffy.models.Card
-import com.pinchotsoft.spiffy.models.Card2
 import com.pinchotsoft.spiffy.models.Order
-import com.pinchotsoft.spiffy.utilities.Stopwatch
+import com.pinchotsoft.spiffy.models.OrderPojo
 import org.junit.Test
 
 class QueryTests {
@@ -11,7 +9,7 @@ class QueryTests {
     @Test
     fun test_simpleSql_handlesPrimitive() {
         TestHelpers.getConnection().use {
-            val results = it.query("select cost from cards where Id = 1", Int::class.java)
+            val results = it.query("select unitsinstock from products where productid = 1", Int::class.java)
 
             assert(results.count() > 0)
             assert(results.first() > 0)
@@ -21,93 +19,93 @@ class QueryTests {
     @Test
     fun test_simpleSql_handlesDataClass() {
         TestHelpers.getConnection().use {
-            val results = it.query("select * from Cards", Card::class.java)
+            val results = it.query("select * from Orders", Order::class.java)
 
             assert(results.count() > 1)
-            assert(results.first().name != "")
+            assert(results.first().shipName != "")
         }
     }
 
     @Test
     fun test_simpleSql_handlesPojo() {
         TestHelpers.getConnection().use {
-            val results = it.query("select * from cards", Card2::class.java)
+            val results = it.query("select * from Orders", OrderPojo::class.java)
 
             assert(results.count() > 1)
-            assert(results.first().name != "")
+            assert(results.first().shipName != "")
         }
     }
 
     @Test
     fun test_query_supportsMap() {
         TestHelpers.getConnection().use {
-            val result = it.query("select * from cards where Id = @ID", mapOf("id" to 1), Card::class.java).firstOrNull()
+            val result = it.query("select * from orders where orderid = @ID", mapOf("id" to 10248), Order::class.java).firstOrNull()
 
             assert(result != null)
 
-            assert(result!!.name != "")
+            assert(result!!.shipName != "")
         }
     }
 
     @Test
     fun test_query_supportsTemplate() {
         TestHelpers.getConnection().use {
-            val template = Card(2, "", null, 1, 2)
+            val template = Order(10249, null, null, null, null, null, null, null, null, null, null, null, null, null)
 
-            val result = it.query("select * from cards where Id = @id", template).firstOrNull()
+            val result = it.query("select * from orders where orderId = @orderId", template).firstOrNull()
 
             assert(result != null)
 
-            assert(result!!.name != "")
+            assert(result!!.shipName != "")
         }
     }
 
     @Test
     fun test_query_selectDataClassSubset() {
         TestHelpers.getConnection().use {
-            val result = it.query("select name, text, cardtype from cards where Id = 1", Card::class.java).firstOrNull()
 
+            val result = it.query("select shipName, freight, shipPostalCode from orders where orderId = 10249", Order::class.java).firstOrNull()
             assert(result != null)
 
-            assert(result!!.id == 0) // because we didnt map that field in the select statement
-            assert(result.cost == 0) // same reason
-            assert(result.name != "")
+            assert(result!!.orderId == 0) // because we didnt map that field in the select statement
+            assert(result.shipVia == 0) // same reason
+            assert(result.shipPostalCode != "")
         }
     }
 
     @Test
     fun test_query_selectPojoSubset() {
         TestHelpers.getConnection().use {
-            val result = it.query("select name, text, cardtype from cards where Id = 1", Card2::class.java).firstOrNull()
+            val result = it.query("select shipName, freight, shipPostalCode from orders where orderId = 10249", OrderPojo::class.java).firstOrNull()
 
             assert(result != null)
 
-            assert(result!!.id == 0) // because we didnt map that field in the select statement
-            assert(result.cost == 0) // same reason
-            assert(result.name != "")
+            assert(result!!.orderId == 0) // because we didnt map that field in the select statement
+            assert(result.shipVia == null) // same reason
+            assert(result.shipPostalCode != "")
         }
     }
 
     @Test
     fun test_query_selectUntypedResults() {
         TestHelpers.getConnection().use {
-            val result = it.query("select * from cards")
+            val result = it.query("select * from orders")
 
             assert(result.count() > 1)
 
-            val card = result.first()
+            val order = result.first()
 
-            assert(card.containsKey("Id"))
-            assert(card.containsKey("Name"))
-            assert(card.containsKey("Text"))
-            assert(card.containsKey("Cost"))
-            assert(card.containsKey("CardType"))
+            assert(order.containsKey("OrderID"))
+            assert(order.containsKey("CustomerID"))
+            assert(order.containsKey("EmployeeID"))
+            assert(order.containsKey("OrderDate"))
+            assert(order.containsKey("Freight"))
         }
     }
 
     @Test
-    fun test_query_filtingWithNull() {
-        TestHelpers.getNorthwindConnection().use {
+    fun test_query_filteringWithNull() {
+        TestHelpers.getConnection().use {
             val result = it.query("select * from orders where shippeddate is @NULLPARAM", mapOf("nullparam" to null))
 
             assert(result.count() > 1)
@@ -116,7 +114,7 @@ class QueryTests {
 
     @Test
     fun test_query_selectWithIterable() {
-        TestHelpers.getNorthwindConnection().use {
+        TestHelpers.getConnection().use {
             val result = it.query("select distinct EmployeeId from Orders where EmployeeId in @EmployeeIds", mapOf("employeeIds" to listOf(1, 2, 3)), Int::class.java)
 
             assert(result.count() == 3)
