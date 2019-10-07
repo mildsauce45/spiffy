@@ -97,7 +97,7 @@ connectionFactory.get().use {
 
 ### Iterable Support
 
-Spiffy allows you to pass an Iterable<T> as a paramter and it will be expanded automatically.
+Spiffy allows you to pass an `Iterable<T>` as a parameter and it will be expanded automatically.
 
 For example:
 
